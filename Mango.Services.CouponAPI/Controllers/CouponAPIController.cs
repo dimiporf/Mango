@@ -38,5 +38,22 @@ namespace Mango.Services.CouponAPI.Controllers
             }
             return null;
         }
+
+        [HttpGet("{id:int}")]
+        // Retrieves a coupon by its ID from the database
+        public object Get(int id)
+        {
+            try
+            {
+                // Retrieves a coupon by its ID from the database
+                Coupon obj = _db.Coupons.First(u => u.CouponId == id);
+                return obj;
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions here
+            }
+            return null;
+        }
     }
 }
