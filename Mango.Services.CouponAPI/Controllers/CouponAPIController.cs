@@ -79,8 +79,15 @@ namespace Mango.Services.CouponAPI.Controllers
         {
             try
             {
-                // Retrieves a coupon by its code from the database
+                // Attempt to retrieve a coupon by its code from the database (case-insensitive comparison)
                 Coupon obj = _db.Coupons.FirstOrDefault(u => u.CouponCode.ToLower() == code.ToLower());
+
+                if (obj == null)
+                {
+                    // If the coupon is not found, set IsSuccess to false and provide a relevant message
+                    _response.IsSuccess = false;
+                    _response.Message = "Coupon not found.";
+                }
 
                 // Map the retrieved Coupon object to CouponDto using IMapper instance
                 _response.Result = _mapper.Map<CouponDto>(obj);
