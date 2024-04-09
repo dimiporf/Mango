@@ -89,17 +89,22 @@ namespace Mango.Services.CouponAPI.Controllers
                     _response.Message = "Coupon not found.";
                 }
 
-                // Map the retrieved Coupon object to CouponDto using IMapper instance
-                _response.Result = _mapper.Map<CouponDto>(obj);
-
+                else
+                {
+                    // Map the retrieved Coupon object to a CouponDto using AutoMapper
+                    _response.Result = _mapper.Map<CouponDto>(obj);
+                    _response.IsSuccess = true; // Indicate that the operation was successful
+                }
 
             }
             catch (Exception ex)
             {
-                // Handle exceptions here
+                // Handle exceptions that occur during database access or mapping
                 _response.IsSuccess = false;
-                _response.Message = ex.Message;
+                _response.Message = $"An error occurred: {ex.Message}";
             }
+
+            // Return the response object containing the result or error information
             return _response;
         }
     }
