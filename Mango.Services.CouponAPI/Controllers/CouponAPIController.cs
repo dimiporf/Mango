@@ -127,6 +127,7 @@ namespace Mango.Services.CouponAPI.Controllers
 
                 // Indicate that the operation was successful
                 _response.IsSuccess = true;
+                _response.Message = $"The coupon with ID {obj.CouponId} has been created.";
             }
             catch (Exception ex)
             {
@@ -144,32 +145,32 @@ namespace Mango.Services.CouponAPI.Controllers
         {
             try
             {
-                // Map the incoming CouponDto to a Coupon entity using AutoMapper
+                // Map the received CouponDto to a Coupon entity
                 Coupon obj = _mapper.Map<Coupon>(couponDto);
 
-                // Update the mapped Coupon entity in the database context
+                // Update the existing Coupon entity in the database
                 _db.Coupons.Update(obj);
 
-                // Save changes to persist the updated coupon in the database
+                // Save changes to persist the update
                 _db.SaveChanges();
 
-                // Map the updated Coupon entity back to a CouponDto and set it as the result
+                // Map the updated Coupon entity back to a CouponDto
                 _response.Result = _mapper.Map<CouponDto>(obj);
 
-                // Indicate that the operation was successful
+                // Set a success message indicating the update was successful
                 _response.IsSuccess = true;
+                _response.Message = $"Coupon with ID {obj.CouponId} updated successfully.";
             }
             catch (Exception ex)
             {
-                // Handle exceptions that occur during database access or mapping
+                // Handle exceptions that occur during database access or update
                 _response.IsSuccess = false;
                 _response.Message = $"An error occurred: {ex.Message}";
             }
 
-            // Return the response object containing the result or error information
+            // Return the response object containing the operation outcome (success or failure)
             return _response;
         }
-
 
         [HttpDelete]
         public ResponseDto Delete(int id)
