@@ -177,7 +177,7 @@ namespace Mango.Services.CouponAPI.Controllers
             try
             {
                 // Retrieve the Coupon entity with the specified ID from the database
-                Coupon obj = _db.Coupons.FirstOrDefault(u => u.CouponId == id);
+                Coupon obj = _db.Coupons.First(u => u.CouponId == id);
 
                 if (obj == null)
                 {
