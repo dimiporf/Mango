@@ -139,5 +139,76 @@ namespace Mango.Services.CouponAPI.Controllers
             return _response;
         }
 
+        [HttpPut]
+        public ResponseDto Put([FromBody] CouponDto couponDto)
+        {
+            try
+            {
+                // Map the incoming CouponDto to a Coupon entity using AutoMapper
+                Coupon obj = _mapper.Map<Coupon>(couponDto);
+
+                // Update the mapped Coupon entity in the database context
+                _db.Coupons.Update(obj);
+
+                // Save changes to persist the updated coupon in the database
+                _db.SaveChanges();
+
+                // Map the updated Coupon entity back to a CouponDto and set it as the result
+                _response.Result = _mapper.Map<CouponDto>(obj);
+
+                // Indicate that the operation was successful
+                _response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions that occur during database access or mapping
+                _response.IsSuccess = false;
+                _response.Message = $"An error occurred: {ex.Message}";
+            }
+
+            // Return the response object containing the result or error information
+            return _response;
+        }
+
+
+        [HttpDelete]
+        public ResponseDto Delete(int id)
+        {
+            try
+            {
+                // Retrieve the Coupon entity with the specified ID from the database
+                Coupon obj = _db.Coupons.FirstOrDefault(u => u.CouponId == id);
+
+                if (obj == null)
+                {
+                    // If the specified coupon is not found, set IsSuccess to false
+                    _response.IsSuccess = false;
+                    _response.Message = $"Coupon with ID {id} not found.";
+                }
+                else
+                {
+                    // Remove the retrieved Coupon entity from the database context
+                    _db.Coupons.Remove(obj);
+
+                    // Save changes to persist the deletion
+                    _db.SaveChanges();
+
+                    // Indicate that the operation was successful
+                    _response.IsSuccess = true;
+                    _response.Message = $"Coupon with ID {id} has been deleted.";
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions that occur during database access or deletion
+                _response.IsSuccess = false;
+                _response.Message = $"An error occurred: {ex.Message}";
+            }
+
+            // Return the response object containing the operation outcome (success or failure)
+            return _response;
+        }
+
+
     }
 }
