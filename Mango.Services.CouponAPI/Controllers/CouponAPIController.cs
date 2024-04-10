@@ -107,5 +107,37 @@ namespace Mango.Services.CouponAPI.Controllers
             // Return the response object containing the result or error information
             return _response;
         }
+
+        [HttpPost]
+        public ResponseDto Post([FromBody] CouponDto couponDto)
+        {
+            try
+            {
+                // Map the incoming CouponDto to a Coupon entity using AutoMapper
+                Coupon obj = _mapper.Map<Coupon>(couponDto);
+
+                // Add the mapped Coupon entity to the database context
+                _db.Coupons.Add(obj);
+
+                // Save changes to persist the new coupon in the database
+                _db.SaveChanges();
+
+                // Map the saved Coupon entity back to a CouponDto and set it as the result
+                _response.Result = _mapper.Map<CouponDto>(obj);
+
+                // Indicate that the operation was successful
+                _response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions that occur during database access or mapping
+                _response.IsSuccess = false;
+                _response.Message = $"An error occurred: {ex.Message}";
+            }
+
+            // Return the response object containing the result or error information
+            return _response;
+        }
+
     }
 }
