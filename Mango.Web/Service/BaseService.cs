@@ -40,7 +40,7 @@ namespace Mango.Web.Service
                 if (requestDto.Data != null)
                 {
                     message.Content = new StringContent(JsonConvert.SerializeObject(requestDto.Data), Encoding.UTF8, "application/json");
-                }
+                }                
 
                 // Set the HTTP method based on the ApiType specified in the RequestDto.
                 switch (requestDto.ApiType)
