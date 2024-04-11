@@ -11,7 +11,7 @@ using System.Linq;
 namespace Mango.Services.CouponAPI.Controllers
 {
     // Controller for handling coupon-related API endpoints
-    [Route("api/[controller]")]
+    [Route("api/coupon")]
     [ApiController]
     public class CouponAPIController : ControllerBase
     {
