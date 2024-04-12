@@ -3,6 +3,7 @@ using Mango.Web.Service.IService;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Mango.Web.Controllers
@@ -61,6 +62,41 @@ namespace Mango.Web.Controllers
 
             // If model state is not valid or creation was unsuccessful, return to the create view with the model
             return View(model);
+        }
+
+        // Action method for deleting
+        public async Task<IActionResult> CouponDelete(int couponId)
+        {
+            // Call the service method to retrieve all coupons asynchronously
+            ResponseDto? response = await _couponService.GetCouponByIdAsync(couponId);
+
+            // Deserialize the response and populate the list if the operation was successful
+            if (response != null && response.IsSuccess)
+            {
+                CouponDto? model = JsonConvert.DeserializeObject<CouponDto>(Convert.ToString(response.Result));
+                
+                return View(model);
+            }
+            return NotFound();
+        }
+
+        // Action method for handling coupon deletion
+        [HttpPost]
+        [ValidateAntiForgeryToken] // Ensures that the request token is valid
+        public async Task<IActionResult> CouponDelete(CouponDto couponDto)
+        {
+            // Call the service method to delete the coupon asynchronously
+            ResponseDto? response = await _couponService.DeleteCouponAsync(couponDto.CouponId);
+
+            // Check if the coupon deletion was successful
+            if (response != null && response.IsSuccess)
+            {
+                // Redirect to the coupon index view upon successful deletion
+                return RedirectToAction(nameof(CouponIndex));
+            }
+
+            // If deletion was unsuccessful, return to the view with the original coupon DTO
+            return View(couponDto);
         }
     }
 }
