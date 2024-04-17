@@ -28,9 +28,47 @@ namespace Mango.Services.AuthAPI.Service
         }
 
         // Method to handle user registration
-        public Task<UserDto> Register(RegistrationRequestDto registrationRequestDto)
+        public async Task<string> Register(RegistrationRequestDto registrationRequestDto)
         {
-            throw new NotImplementedException(); // Placeholder implementation
+            // Create a new ApplicationUser instance with the provided registration details
+            ApplicationUser user = new()
+            {
+                UserName = registrationRequestDto.Email,
+                Email = registrationRequestDto.Email,
+                NormalizedEmail = registrationRequestDto.Email.ToUpper(),
+                Name = registrationRequestDto.Name,
+                PhoneNumber = registrationRequestDto.PhoneNumber
+            };
+            try
+            {
+                // Attempt to create the user in the database using UserManager
+                var result = await _userManager.CreateAsync(user, registrationRequestDto.Password);
+                if (result.Succeeded)
+                {
+                    // If user creation is successful, retrieve the created user from the database
+                    var userToReturn = _db.ApplicationUsers.First(u=>u.UserName == registrationRequestDto.Email);
+
+                    // Map the retrieved ApplicationUser to a UserDto
+                    UserDto userDto = new()
+                    {
+                        Email = userToReturn.Email,
+                        ID = userToReturn.Id,
+                        Name = userToReturn.Name,
+                        PhoneNumber = userToReturn.PhoneNumber
+                    };
+
+                    return "";
+                }
+                else
+                {
+                    return result.Errors.FirstOrDefault().Description;
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return "Error Encountered";
         }
     }
 }
