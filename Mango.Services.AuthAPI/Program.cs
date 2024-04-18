@@ -23,6 +23,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFramework
 
 builder.Services.AddControllers();
 
+// Register the JwtTokenGenerator service to generate JWT tokens for authentication.
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+
 // Registering AuthService with the dependency injection container
 builder.Services.AddScoped<IAuthService, AuthService>();
 
