@@ -1,5 +1,6 @@
 ﻿using Mango.Services.AuthAPI.Models;
 using Mango.Services.AuthAPI.Service.IService;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -13,9 +14,9 @@ namespace Mango.Services.AuthAPI.Service
         private readonly JwtOptions _jwtOptions;
 
         // Initializes a new instance of the JwtTokenGenerator class with JwtOptions dependency.
-        public JwtTokenGenerator(JwtOptions jwtOptions)
+        public JwtTokenGenerator(IOptions<JwtOptions> jwtOptions)
         {
-            _jwtOptions = jwtOptions;
+            _jwtOptions = jwtOptions.Value;
         }
 
         // Generates a JWT token for the specified ApplicationUser.
