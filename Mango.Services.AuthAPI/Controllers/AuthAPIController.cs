@@ -39,14 +39,27 @@ namespace Mango.Services.AuthAPI.Controllers
 
         // POST: api/auth/login
         [HttpPost("login")]
-        public async Task<IActionResult> Login()
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto model)
         {
-            // Implement login logic here
-            // For example, handle user authentication and token generation
+            // Call the AuthService to perform user login
+            var loginResponse = await _authService.Login(model);
 
-            // Return an Ok response indicating successful login
-            return Ok();
+            // Check if the loginResponse contains a valid user
+            if (loginResponse.User == null)
+            {
+                // If the user is not found or authentication fails, return a BadRequest with an error message
+                _response.IsSuccess = false;
+                _response.Message = "Username or Password are incorrect";
+                return BadRequest(_response);
+            }
+
+            // Set the result in the response to the loginResponse
+            _response.Result = loginResponse;
+
+            // Return an Ok response indicating successful login along with the loginResponse
+            return Ok(_response);
         }
+
     }
 }
 

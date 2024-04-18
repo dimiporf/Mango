@@ -21,10 +21,46 @@ namespace Mango.Services.AuthAPI.Service
             _roleManager = roleManager;
         }
 
-        // Method to handle user login
-        public Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
+        // Method to handle user login and generate JWT token upon successful login
+        public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
         {
-            throw new NotImplementedException(); // Placeholder implementation
+            // Find the user by username (case-insensitive)
+            var user = _db.ApplicationUsers.FirstOrDefault(u=>u.UserName.ToLower()==loginRequestDto.UserName.ToLower());
+
+            // Check if the user exists and the provided password is valid
+            bool isValid = await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
+
+            if (user==null  || isValid== false)
+            {
+                // If user is not found or password is invalid, return an empty LoginResponseDto
+                return new LoginResponseDto()
+                {
+                    User = null,
+                    Token = ""
+                };
+            }
+
+            // User is authenticated, generate JWT token (implementation omitted)
+
+            // Create a UserDto object from the authenticated user
+
+            UserDto userDto = new()
+            {
+                Email = user.Email,
+                ID = user.Id,
+                Name = user.Name,
+                PhoneNumber = user.PhoneNumber
+            };
+
+            // Construct a LoginResponseDto with the authenticated user and an empty token
+            LoginResponseDto loginResponseDto = new LoginResponseDto
+            {
+                User = userDto,
+                Token = "" // Generate and assign the JWT token here
+            };
+
+            // Return the LoginResponseDto containing the authenticated user and JWT token
+            return loginResponseDto;
         }
 
         // Method to handle user registration
