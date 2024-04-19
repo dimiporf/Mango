@@ -14,6 +14,9 @@
 
         // Password of the user to be registered
         public string Password { get; set; }
+
+        // Role property of the user
+        public string? Role { get; set; }
     }
 }
 
