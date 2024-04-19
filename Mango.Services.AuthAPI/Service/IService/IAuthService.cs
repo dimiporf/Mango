@@ -10,5 +10,8 @@ namespace Mango.Services.AuthAPI.Service.IService
 
         // Method to handle user login
         Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto);
+
+        // Method to assign role to the user
+        Task<bool> AssignRole(string email, string roleName);
     }
 }

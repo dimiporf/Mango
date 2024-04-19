@@ -23,6 +23,28 @@ namespace Mango.Services.AuthAPI.Service
             _jwtTokenGenerator = jwtTokenGenerator;
         }
 
+        // Asynchronously assigns the specified role to a user identified by their email.
+        public async Task<bool> AssignRole(string email, string roleName)
+        {
+            // Find the user by email (case-insensitive)
+            var user = _db.ApplicationUsers.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
+
+            if (user != null)
+            {
+                // Check if the role exists
+                if (!_roleManager.RoleExistsAsync(roleName).GetAwaiter().GetResult())
+                {
+                    // Create role if it does not already exist
+                    _roleManager.CreateAsync(new IdentityRole(roleName)).GetAwaiter().GetResult();
+                }
+                // Add the user to the specified role
+                await _userManager.AddToRoleAsync(user, roleName);
+
+                return true; // Role assigned successfully
+            }
+            return false; // User not found or role assignment failed
+        }
+
         // Method to handle user login and generate JWT token upon successful login
         public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
         {
