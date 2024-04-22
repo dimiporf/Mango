@@ -19,6 +19,9 @@ builder.Services.AddHttpClient<ICouponService, CouponService>();
 // Set the CouponAPIBase URL from configuration to the SD utility class.
 SD.CouponAPIBase = builder.Configuration["ServiceUrls:CouponAPI"];
 
+// Set the AuthAPIBase URL from configuration to the SD utility class.
+SD.AuthAPIBase = builder.Configuration["ServiceUrls:AuthAPI"];
+
 // Register IBaseService and ICouponService with their respective implementations
 builder.Services.AddScoped<IBaseService, BaseService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
