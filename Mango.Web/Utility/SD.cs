@@ -9,6 +9,10 @@
         // Base URL for the Auth API.
         public static string AuthAPIBase { get; set; }
 
+        // Constants for role configuration
+        public const string RoleAdmin = "ADMIN";
+        public const string RoleCustomer = "CUSTOMER";
+
         // Enumeration representing HTTP request types.
         public enum ApiType
         {
