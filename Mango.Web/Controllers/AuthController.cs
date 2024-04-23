@@ -125,11 +125,18 @@ namespace Mango.Web.Controllers
 
         // GET: /Auth/Logout
         [HttpGet]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            // Return the logout view
-            return View();
+            // Sign out the user's authentication session
+            await HttpContext.SignOutAsync();
+
+            // Clear the JWT token stored in the client (browser)
+            _tokenProvider.ClearToken();
+
+            // Redirect the user to the home page after successful logout
+            return RedirectToAction("Index", "Home");
         }
+
 
         private async Task SignInUser(LoginResponseDto model)
         {
