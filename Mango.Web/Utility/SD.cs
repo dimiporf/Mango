@@ -13,6 +13,9 @@
         public const string RoleAdmin = "ADMIN";
         public const string RoleCustomer = "CUSTOMER";
 
+        // Constant for Token cookies
+        public const string TokenCookie = "JWTToken";
+
         // Enumeration representing HTTP request types.
         public enum ApiType
         {

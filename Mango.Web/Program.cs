@@ -13,6 +13,9 @@ builder.Services.AddHttpContextAccessor();
 // Add HttpClient service to the service collection for making HTTP requests.
 builder.Services.AddHttpClient();
 
+// Register TokenProvider as a scoped service to manage token storage.
+builder.Services.AddScoped<ITokenProvider, TokenProvider>();
+
 // Register HttpClient for ICouponService with CouponService implementation
 builder.Services.AddHttpClient<ICouponService, CouponService>();
 
