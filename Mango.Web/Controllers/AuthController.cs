@@ -1,9 +1,15 @@
 ﻿using Mango.Web.Models;
 using Mango.Web.Service.IService;
 using Mango.Web.Utility;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Newtonsoft.Json;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using JwtRegisteredClaimNames = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames;
 
 namespace Mango.Web.Controllers
 {
@@ -40,6 +46,9 @@ namespace Mango.Web.Controllers
             {
                 // Deserialize the login response and redirect to the home page upon successful login
                 LoginResponseDto loginResponseDto = JsonConvert.DeserializeObject<LoginResponseDto>(Convert.ToString(responseDto.Result));
+
+                // Asynchronously sign-in the user
+                await SignInUser(loginResponseDto);
 
                 // Set the retrieved token in the token provider for subsequent requests
                 _tokenProvider.SetToken(loginResponseDto.Token);
@@ -121,5 +130,30 @@ namespace Mango.Web.Controllers
             // Return the logout view
             return View();
         }
+
+        private async Task SignInUser(LoginResponseDto model)
+        {
+            // Create a JwtSecurityTokenHandler instance to handle JWT tokens
+            var handler = new JwtSecurityTokenHandler();
+
+            // Read the JWT token from the LoginResponseDto model
+            var jwt = handler.ReadJwtToken(model.Token);
+
+            // Create a new ClaimsIdentity for the authenticated user
+            var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Add claims from the JWT token to the ClaimsIdentity
+            identity.AddClaim(new Claim(JwtRegisteredClaimNames.Email, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Email)?.Value));
+            identity.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Sub)?.Value));
+            identity.AddClaim(new Claim(JwtRegisteredClaimNames.Name, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Name)?.Value));
+            identity.AddClaim(new Claim(ClaimTypes.Name, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Email)?.Value));
+
+            // Create a ClaimsPrincipal from the ClaimsIdentity
+            var principal = new ClaimsPrincipal(identity);
+
+            // Sign in the user using the created ClaimsPrincipal and default authentication scheme (cookie-based)
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+        }
+
     }
 }
