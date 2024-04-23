@@ -13,9 +13,6 @@ builder.Services.AddHttpContextAccessor();
 // Add HttpClient service to the service collection for making HTTP requests.
 builder.Services.AddHttpClient();
 
-// Register TokenProvider as a scoped service to manage token storage.
-builder.Services.AddScoped<ITokenProvider, TokenProvider>();
-
 // Register HttpClient for ICouponService with CouponService implementation
 builder.Services.AddHttpClient<ICouponService, CouponService>();
 
@@ -33,6 +30,9 @@ SD.AuthAPIBase = builder.Configuration["ServiceUrls:AuthAPI"];
 builder.Services.AddScoped<IBaseService, BaseService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Register TokenProvider as a scoped service to manage token storage.
+builder.Services.AddScoped<ITokenProvider, TokenProvider>();
 
 
 var app = builder.Build();

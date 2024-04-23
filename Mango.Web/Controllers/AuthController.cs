@@ -11,11 +11,13 @@ namespace Mango.Web.Controllers
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
+        private readonly ITokenProvider _tokenProvider;
 
         // Initializes a new instance of the AuthController class with the specified authentication service.
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, ITokenProvider tokenProvider)
         {
             _authService = authService;
+            _tokenProvider = tokenProvider;
         }
 
         // GET: /Auth/Login
@@ -38,6 +40,11 @@ namespace Mango.Web.Controllers
             {
                 // Deserialize the login response and redirect to the home page upon successful login
                 LoginResponseDto loginResponseDto = JsonConvert.DeserializeObject<LoginResponseDto>(Convert.ToString(responseDto.Result));
+
+                // Set the retrieved token in the token provider for subsequent requests
+                _tokenProvider.SetToken(loginResponseDto.Token);
+
+                // Redirect to the home page upon successful login
                 return RedirectToAction("Index", "Home");
             }
             else
