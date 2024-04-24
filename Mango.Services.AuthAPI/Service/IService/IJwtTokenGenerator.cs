@@ -6,7 +6,7 @@ namespace Mango.Services.AuthAPI.Service.IService
     public interface IJwtTokenGenerator
     {
         // Generates a JWT token for the specified ApplicationUser.
-        string GenerateToken(ApplicationUser applicationUser);
+        string GenerateToken(ApplicationUser applicationUser, IEnumerable<string> roles);
     }
 }
 
