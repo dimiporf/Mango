@@ -59,7 +59,7 @@ namespace Mango.Web.Controllers
             else
             {
                 // Display a custom error message in case of failed login
-                ModelState.AddModelError("CustomError", responseDto.Message);
+                TempData["error"] = responseDto.Message;
                 return View(obj);
             }
         }
@@ -106,6 +106,12 @@ namespace Mango.Web.Controllers
                     TempData["success"] = "Registration Successful";
                     return RedirectToAction(nameof(Login));
                 }
+                
+            }
+            else
+            {
+                // Assign a notification for when registration encounters an error
+                TempData["error"] = result.Message;
             }
 
             // Prepare a list of role options to be displayed in the view
