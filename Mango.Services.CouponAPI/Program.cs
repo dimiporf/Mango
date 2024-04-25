@@ -1,7 +1,10 @@
 using AutoMapper;
 using Mango.Services.CouponAPI;
 using Mango.Services.CouponAPI.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +32,43 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Retrieve JWT secret, issuer, and audience from configuration
+var secret = builder.Configuration.GetValue<string>("ApiSettings:Secret");
+var issuer = builder.Configuration.GetValue<string>("ApiSettings:Issuer");
+var audience = builder.Configuration.GetValue<string>("ApiSettings:Audience");
+
+// Convert the secret into a byte array
+var key = Encoding.ASCII.GetBytes(secret);
+
+// Add JWT authentication services to the DI container
+builder.Services.AddAuthentication(x =>
+{
+    // Specify the default authentication scheme for both authentication and challenge responses
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(x =>
+{
+    // Configure the JWT bearer options
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        // Enable validation of the JWT signature using the specified key
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+
+        // Validate the JWT issuer (if specified) against the expected issuer
+        ValidateIssuer = true,
+        ValidIssuer = issuer,
+
+        // Validate the JWT audience (if specified) against the expected audience
+        ValidAudience = audience,
+        ValidateAudience = true
+    };
+});
+
+// Add authorization services to the DI container
+builder.Services.AddAuthorization();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,6 +79,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
