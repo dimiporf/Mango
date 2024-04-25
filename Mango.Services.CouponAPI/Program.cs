@@ -4,6 +4,7 @@ using Mango.Services.CouponAPI.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,12 +31,45 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+
+builder.Services.AddSwaggerGen(option =>
+{
+    // Add a security definition for Bearer token authentication
+    option.AddSecurityDefinition(name: JwtBearerDefaults.AuthenticationScheme, securityScheme: new OpenApiSecurityScheme
+    {
+        Name = "Authorization", // Name of the header to be used
+        Description = "Enter the Bearer Authorization string as following: `Bearer Generated-JWT-Token`", // Description displayed in Swagger UI
+        In = ParameterLocation.Header, // Location of the API key (in the header)
+        Type = SecuritySchemeType.ApiKey, // Type of security scheme (ApiKey)
+        Scheme = "Bearer" // Authentication scheme (Bearer)
+    });
+
+    // Add a security requirement for Bearer token authentication
+    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = JwtBearerDefaults.AuthenticationScheme // Reference to the defined security scheme
+                }
+            },
+            new string[] {} // Empty array indicates no specific scopes are required
+        }
+    });
+});
+
+// Parse the ApiSettings Section into a variable to demonstrate 'GetSection' method
+var settingsSection = builder.Configuration.GetSection("ApiSettings");
+
 
 // Retrieve JWT secret, issuer, and audience from configuration
-var secret = builder.Configuration.GetValue<string>("ApiSettings:Secret");
-var issuer = builder.Configuration.GetValue<string>("ApiSettings:Issuer");
-var audience = builder.Configuration.GetValue<string>("ApiSettings:Audience");
+var secret = settingsSection.GetValue<string>("Secret");
+var issuer = settingsSection.GetValue<string>("Issuer");
+var audience = settingsSection.GetValue<string>("Audience");
 
 // Convert the secret into a byte array
 var key = Encoding.ASCII.GetBytes(secret);
