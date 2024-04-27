@@ -36,12 +36,19 @@ namespace Mango.Web.Service
                 HttpRequestMessage message = new HttpRequestMessage();
                 message.Headers.Add("Accept", "application/json");
 
-                // Added authorization token via Token Provider dependency injection
+                // Check if the 'withBearer' flag is true for token authorization
                 if (withBearer)
                 {
-                    var token = _tokenProvider.GetToken();
-                    message.Headers.Add("Authorization", $"Bearer {token}");
+                    var token = _tokenProvider.GetToken(); // Retrieve the JWT token from the token provider
+
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        // If a valid token is retrieved
+                        message.Headers.Add("Authorization", $"Bearer {token}");
+                        // Add the Bearer token to the 'Authorization' header of the HTTP request
+                    }
                 }
+
 
                 // Set the request URL based on the RequestDto's Url property.
                 message.RequestUri = new Uri(requestDto.Url);
