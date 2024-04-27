@@ -15,14 +15,17 @@ namespace Mango.Web.Service
     {
         private readonly IHttpClientFactory _httpClientFactory;
 
+        private readonly ITokenProvider _tokenProvider;
+
         // Initializes a new instance of the BaseService class.
-        public BaseService(IHttpClientFactory httpClientFactory)
+        public BaseService(IHttpClientFactory httpClientFactory, ITokenProvider tokenProvider)
         {
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            _tokenProvider = tokenProvider;
         }
 
         // Sends an asynchronous HTTP request based on the provided RequestDto and returns a ResponseDto.
-        public async Task<ResponseDto?> SendAsync(RequestDto requestDto)
+        public async Task<ResponseDto?> SendAsync(RequestDto requestDto, bool withBearer = true)
         {
             try
             {
@@ -32,6 +35,13 @@ namespace Mango.Web.Service
                 // Create a new HTTP request message.
                 HttpRequestMessage message = new HttpRequestMessage();
                 message.Headers.Add("Accept", "application/json");
+
+                // Added authorization token via Token Provider dependency injection
+                if (withBearer)
+                {
+                    var token = _tokenProvider.GetToken();
+                    message.Headers.Add("Authorization", $"Bearer {token}");
+                }
 
                 // Set the request URL based on the RequestDto's Url property.
                 message.RequestUri = new Uri(requestDto.Url);

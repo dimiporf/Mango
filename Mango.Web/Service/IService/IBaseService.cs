@@ -7,7 +7,7 @@ namespace Mango.Web.Service.IService
     public interface IBaseService
     {
         // Sends an asynchronous HTTP request using the provided RequestDto and returns a ResponseDto.
-        Task<ResponseDto?> SendAsync(RequestDto requestDto);
+        Task<ResponseDto?> SendAsync(RequestDto requestDto, bool withBearer = true);
     }
 }
 
