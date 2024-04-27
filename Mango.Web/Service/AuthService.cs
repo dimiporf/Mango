@@ -23,7 +23,7 @@ namespace Mango.Web.Service
                 ApiType = SD.ApiType.POST, // HTTP POST request
                 Data = registrationRequestDto, // Payload data (registration details)
                 Url = SD.AuthAPIBase + "/api/auth/AssignRole" // Target API endpoint URL
-            }, withBearer: false); // Do not include Bearer token in the request headers
+            }); 
         }
 
 
@@ -35,7 +35,7 @@ namespace Mango.Web.Service
                 ApiType = SD.ApiType.POST,
                 Data = loginRequestDto,
                 Url = SD.AuthAPIBase + "/api/auth/login"
-            });
+            }, withBearer: false);
         }
 
         // Asynchronously registers a new user based on the provided registration details.
@@ -46,7 +46,7 @@ namespace Mango.Web.Service
                 ApiType = SD.ApiType.POST,
                 Data = registrationRequestDto,
                 Url = SD.AuthAPIBase + "/api/auth/register"
-            });
+            }, withBearer: false); // Do not include Bearer token in the request headers
         }
     }
 }
