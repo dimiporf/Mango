@@ -20,11 +20,12 @@ namespace Mango.Web.Service
         {
             return await _baseService.SendAsync(new RequestDto()
             {
-                ApiType = SD.ApiType.POST,
-                Data = registrationRequestDto,
-                Url = SD.AuthAPIBase + "/api/auth/AssignRole"
-            });
+                ApiType = SD.ApiType.POST, // HTTP POST request
+                Data = registrationRequestDto, // Payload data (registration details)
+                Url = SD.AuthAPIBase + "/api/auth/AssignRole" // Target API endpoint URL
+            }, withBearer: false); // Do not include Bearer token in the request headers
         }
+
 
         // Asynchronously performs user login based on the provided login request.
         public async Task<ResponseDto?> LoginAsync(LoginRequestDto loginRequestDto)
