@@ -3,8 +3,9 @@
     // Defines a utility class containing constants and enums used across the application.
     public class SD
     {
-        // Base URL for the Coupon API.
+        // Base URL for the Coupon and Product APIs.
         public static string CouponAPIBase { get; set; }
+        public static string ProductAPIBase { get; set; }
 
         // Base URL for the Auth API.
         public static string AuthAPIBase { get; set; }

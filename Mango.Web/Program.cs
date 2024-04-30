@@ -17,6 +17,8 @@ builder.Services.AddHttpClient();
 // Register HttpClient for ICouponService with CouponService implementation
 builder.Services.AddHttpClient<ICouponService, CouponService>();
 
+// Register HttpClient for IProductService with ProductService implementation
+builder.Services.AddHttpClient<IProductService, ProductService>();
 
 // Register HttpClient for IAuthService with AuthService implementation
 builder.Services.AddHttpClient<IAuthService, AuthService>();
@@ -27,10 +29,14 @@ SD.CouponAPIBase = builder.Configuration["ServiceUrls:CouponAPI"];
 // Set the AuthAPIBase URL from configuration to the SD utility class.
 SD.AuthAPIBase = builder.Configuration["ServiceUrls:AuthAPI"];
 
+// Set the ProductAPIBase URL from configuration to the SD utility class.
+SD.ProductAPIBase = builder.Configuration["ServiceUrls:ProductAPI"];
+
 // Register IBaseService and ICouponService with their respective implementations
 builder.Services.AddScoped<IBaseService, BaseService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 // Register TokenProvider as a scoped service to manage token storage.
 builder.Services.AddScoped<ITokenProvider, TokenProvider>();
