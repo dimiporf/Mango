@@ -118,5 +118,50 @@ namespace Mango.Web.Controllers
             // If deletion was unsuccessful, return to the view with the original product DTO
             return View(productDto);
         }
+
+        // Action method for Editing
+        public async Task<IActionResult> ProductEdit(int productId)
+        {
+            // Call the service method to retrieve all products asynchronously
+            ResponseDto? response = await _productService.GetProductByIdAsync(productId);
+
+            // Deserialize the response and populate the list if the operation was successful
+            if (response != null && response.IsSuccess)
+            {
+                ProductDto? model = JsonConvert.DeserializeObject<ProductDto>(Convert.ToString(response.Result));
+
+                return View(model);
+            }
+            else
+            {
+                TempData["error"] = response?.Message;
+            }
+            return NotFound();
+        }
+
+        // Action method for handling product editing
+        [HttpPost]
+        [ValidateAntiForgeryToken] // Ensures that the request token is valid
+        public async Task<IActionResult> ProductEdit(ProductDto productDto)
+        {
+            // Call the service method to update the product asynchronously
+            ResponseDto? response = await _productService.UpdateProductAsync(productDto);
+
+            // Check if the product deletion was successful
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Product updated successfully!";
+
+                // Redirect to the product index view upon successful editing
+                return RedirectToAction(nameof(ProductIndex));
+            }
+            else
+            {
+                TempData["error"] = response?.Message;
+            }
+
+            // If editing was unsuccessful, return to the view with the original product DTO
+            return View(productDto);
+        }
     }
 }
