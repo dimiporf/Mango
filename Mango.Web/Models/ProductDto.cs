@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Mango.Web.Models
 {
@@ -16,6 +17,9 @@ namespace Mango.Web.Models
         public string CategoryName { get; set; } // Category name to which the product belongs
 
         public string ImageUrl { get; set; } // URL of the product image
+
+        [Range(1, 100)]
+        public int Count { get; set; } = 1; // Set by default to 1 to populate the cart with order by 1 piece
     }
 }
 
