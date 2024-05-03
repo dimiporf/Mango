@@ -39,7 +39,7 @@ namespace Mango.Web.Controllers
 
         // Retrieves and displays details of a product identified by the specified productId.
         [Authorize]
-        public async Task<IActionResult> Details(int productId)
+        public async Task<IActionResult> ProductDetails(int productId)
         {
             ProductDto model = new ProductDto(); // Initialize a new ProductDto object
 
