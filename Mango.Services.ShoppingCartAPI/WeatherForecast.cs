@@ -1,4 +1,4 @@
-namespace Mango.Services.ProductAPI
+namespace Mango.Services.ShoppingCartAPI
 {
     public class WeatherForecast
     {
