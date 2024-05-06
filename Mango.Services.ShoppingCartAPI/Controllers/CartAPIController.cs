@@ -2,6 +2,7 @@
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Models;
 using Mango.Services.ShoppingCartAPI.Models.Dto;
+using Mango.Services.ShoppingCartAPI.Service.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,14 +18,58 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         private ResponseDto _response; // Holds the response data for API operations.
         private IMapper _mapper; // Handles object mapping operations.
         private readonly AppDbContext _db; // Represents the application database context.
+        private IProductService _productService;
 
         // Initializes a new instance of the CartAPIController class.
-        public CartAPIController(AppDbContext db, IMapper mapper)
+        public CartAPIController(AppDbContext db, IMapper mapper, IProductService productService)
         {
             _db = db;
             this._response = new ResponseDto(); // Initialize the response object.
             _mapper = mapper; // Assign the mapper for object mapping operations.
+            _productService = productService;
         }
+
+        // Handles the HTTP GET request to retrieve a user's shopping cart details.
+        [HttpGet("GetCart/{userId}")]
+        public async Task<ResponseDto> GetCart(string userId)
+        {
+            try
+            {
+                // Initialize a new CartDto to hold the retrieved cart details.
+                CartDto cart = new CartDto()
+                {
+                    // Map the CartHeaderDto from the database based on the provided userId.
+                    CartHeader = _mapper.Map<CartHeaderDto>(_db.CartHeaders.First(u => u.UserId == userId))
+                };
+                // Retrieve the cart details associated with the retrieved cart header from the database.
+                cart.CartDetails = _mapper.Map<IEnumerable<CartDetailsDto>>(_db.CartDetails.Where(u => u.CartHeaderId == cart.CartHeader.CartHeaderId));
+
+                // Retrieve product details asynchronously from the ProductAPI using the ProductService.
+                IEnumerable<ProductDto> productDtos = await _productService.GetProducts();
+
+                // Iterate through each cart item and map the corresponding product details.
+                foreach (var item in cart.CartDetails)
+                {
+                    // Retrieve the product details based on the ProductId and assign it to the cart item.
+                    item.Product = productDtos.FirstOrDefault(u => u.ProductId == item.ProductId);
+
+                    // Calculate the subtotal for each cart item and update the total cart amount.
+                    cart.CartHeader.CartTotal += (item.Count * item.Product.Price);
+                }
+
+                // Set the result of the response to the retrieved cart details.
+                _response.Result = cart;
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occur during the cart retrieval process.
+                _response.IsSuccess = false;
+                _response.Message = ex.Message;
+            }
+
+            return _response; // Return the response object after processing the cart retrieval.
+        }
+
 
         // Handles the HTTP POST request to upsert a shopping cart.
         [HttpPost("CartUpsert")]
