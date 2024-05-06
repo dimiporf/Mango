@@ -33,7 +33,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             try
             {
                 // Retrieve the cart header from the database based on the user ID.
-                var cartHeaderFromDb = await _db.CartHeaders.FirstOrDefaultAsync(u => u.UserId == cartDto.CartHeader.UserId);
+                var cartHeaderFromDb = await _db.CartHeaders.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == cartDto.CartHeader.UserId);
 
                 if (cartHeaderFromDb == null)
                 {
@@ -50,7 +50,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 else
                 {
                     // Check if the product already exists in the cart details for the given cart header.
-                    var cartDetailsFromDb = await _db.CartDetails.FirstOrDefaultAsync(
+                    var cartDetailsFromDb = await _db.CartDetails.AsNoTracking().FirstOrDefaultAsync(
                         u => u.ProductId == cartDto.CartDetails.First().ProductId &&
                              u.CartHeaderId == cartHeaderFromDb.CartHeaderId);
 
@@ -65,8 +65,8 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                     {
                         // Update existing cart details by combining counts and IDs.
                         cartDto.CartDetails.First().Count += cartDetailsFromDb.Count;
-                        cartDto.CartDetails.First().CartHeaderId += cartDetailsFromDb.CartHeaderId;
-                        cartDto.CartDetails.First().CartDetailsId += cartDetailsFromDb.CartDetailsId;
+                        cartDto.CartDetails.First().CartHeaderId = cartDetailsFromDb.CartHeaderId;
+                        cartDto.CartDetails.First().CartDetailsId = cartDetailsFromDb.CartDetailsId;
 
                         _db.CartDetails.Update(_mapper.Map<CartDetails>(cartDto.CartDetails.First()));
                         await _db.SaveChangesAsync();
