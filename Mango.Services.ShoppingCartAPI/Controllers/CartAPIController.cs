@@ -86,5 +86,42 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
 
+        // Handles the HTTP POST request to remove a cart item from the shopping cart.
+        [HttpPost("RemoveCart")]
+        public async Task<ResponseDto> RemoveCart([FromBody] int cardDetailsId)
+        {
+            try
+            {
+                // Retrieve the cart details by ID from the database.
+                CartDetails cartDetails = _db.CartDetails.First(u => u.CartDetailsId == cardDetailsId);
+
+                // Count the total number of cart items associated with the same cart header.
+                int totalCountOfCartItems = _db.CartDetails.Where(u => u.CartHeaderId == cartDetails.CartHeaderId).Count();
+
+                // Remove the specified cart details from the database.
+                _db.CartDetails.Remove(cartDetails);
+
+                // If the total count of cart items for the cart header is 1, remove the cart header as well.
+                if (totalCountOfCartItems == 1)
+                {
+                    var cartHeaderToRemove = await _db.CartHeaders.FirstOrDefaultAsync(u => u.CartHeaderId == cartDetails.CartHeaderId);
+                    _db.CartHeaders.Remove(cartHeaderToRemove);
+                }
+
+                // Save changes to the database.
+                await _db.SaveChangesAsync();
+
+                _response.Result = true; // Set the result to true indicating successful removal.
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occur during the cart item removal process.
+                _response.Message = ex.Message.ToString();
+                _response.IsSuccess = false;
+            }
+
+            return _response; // Return the response object after processing the cart item removal.
+        }
+
     }
 }
