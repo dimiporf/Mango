@@ -5,6 +5,7 @@ using Mango.Services.ShoppingCartAPI.Models.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.PortableExecutable;
 
 namespace Mango.Services.ShoppingCartAPI.Controllers
 {
@@ -55,15 +56,24 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
 
                     if (cartDetailsFromDb == null)
                     {
-                        // If the product doesn't exist in the cart details, create a new cart details entry.
-                        // Additional logic for creating new cart details goes here.
+                        // Add new cart details to the existing cart header.
+                        cartDto.CartDetails.First().CartHeaderId = cartHeaderFromDb.CartHeaderId;
+                        _db.CartDetails.Add(_mapper.Map<CartDetails>(cartDto.CartDetails.First()));
+                        await _db.SaveChangesAsync();
                     }
                     else
                     {
-                        // If the product already exists, update its count in the cart details.
-                        // Additional logic for updating cart details count goes here.
+                        // Update existing cart details by combining counts and IDs.
+                        cartDto.CartDetails.First().Count += cartDetailsFromDb.Count;
+                        cartDto.CartDetails.First().CartHeaderId += cartDetailsFromDb.CartHeaderId;
+                        cartDto.CartDetails.First().CartDetailsId += cartDetailsFromDb.CartDetailsId;
+
+                        _db.CartDetails.Update(_mapper.Map<CartDetails>(cartDto.CartDetails.First()));
+                        await _db.SaveChangesAsync();
                     }
                 }
+
+                _response.Result = cartDto; // Set the result to the updated CartDto.
             }
             catch (Exception ex)
             {
@@ -74,6 +84,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
 
             return _response; // Return the response object after processing the cart upsert operation.
         }
+
 
     }
 }
