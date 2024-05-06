@@ -19,14 +19,16 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         private IMapper _mapper; // Handles object mapping operations.
         private readonly AppDbContext _db; // Represents the application database context.
         private IProductService _productService;
+        private ICouponService _couponService;
 
         // Initializes a new instance of the CartAPIController class.
-        public CartAPIController(AppDbContext db, IMapper mapper, IProductService productService)
+        public CartAPIController(AppDbContext db, IMapper mapper, IProductService productService, ICouponService couponService)
         {
             _db = db;
             this._response = new ResponseDto(); // Initialize the response object.
             _mapper = mapper; // Assign the mapper for object mapping operations.
             _productService = productService;
+            _couponService = couponService; 
         }
 
         // Handles the HTTP GET request to retrieve a user's shopping cart details.
@@ -56,6 +58,16 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                     // Calculate the subtotal for each cart item and update the total cart amount.
                     cart.CartHeader.CartTotal += (item.Count * item.Product.Price);
                 }
+                // Logic for applying coupons, if any
+                if (!string.IsNullOrEmpty(cart.CartHeader.CouponCode))
+                {
+                    CouponDto coupon = await _couponService.GetCoupon(cart.CartHeader.CouponCode);
+                    if(coupon != null && cart.CartHeader.CartTotal > coupon.MinAmount)
+                    {
+                        cart.CartHeader.CartTotal -= coupon.DiscountAmount;
+                        cart.CartHeader.Discount = coupon.DiscountAmount;
+                    }                    
+                }
 
                 // Set the result of the response to the retrieved cart details.
                 _response.Result = cart;
@@ -70,6 +82,39 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             return _response; // Return the response object after processing the cart retrieval.
         }
 
+        // POST endpoint to apply a coupon code to a user's cart
+        [HttpPost("ApplyCoupon")]
+        public async Task<object> ApplyCoupon([FromBody] CartDto cartDto)
+        {
+            try
+            {
+                // Retrieve the CartHeader from the database based on UserId provided in cartDto
+                var cartFromDb = await _db.CartHeaders.FirstAsync(u => u.UserId == cartDto.CartHeader.UserId);
+
+                // Update the CouponCode of the retrieved CartHeader with the new CouponCode from cartDto
+                cartFromDb.CouponCode = cartDto.CartHeader.CouponCode;
+
+                // Mark the CartHeader entity as updated in the database context
+                _db.CartHeaders.Update(cartFromDb);
+
+                // Save the changes to the database
+                await _db.SaveChangesAsync();
+
+                // Prepare a success response
+                _response.Result = true;
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that might occur during the process
+                _response.IsSuccess = false;
+                _response.Message = ex.ToString(); // Capture the exception details in the response message
+            }
+
+            // Return the response object, which might include success/failure status and message
+            return _response;
+        }
+
+        
 
         // Handles the HTTP POST request to upsert a shopping cart.
         [HttpPost("CartUpsert")]

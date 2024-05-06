@@ -20,7 +20,7 @@ namespace Mango.Services.ShoppingCartAPI.Service
             var client = _httpClientFactory.CreateClient("Product");
 
             // Send an HTTP GET request to the product API endpoint.
-            var response = await client.GetAsync("/api/product");
+            var response = await client.GetAsync($"/api/product");
 
             // Read the response content as a string.
             var apiContent = await response.Content.ReadAsStringAsync();
