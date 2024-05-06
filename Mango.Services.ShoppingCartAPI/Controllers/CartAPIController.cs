@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Mango.Services.ShoppingCartAPI.Data;
+using Mango.Services.ShoppingCartAPI.Models;
 using Mango.Services.ShoppingCartAPI.Models.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,32 +31,49 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         {
             try
             {
-                var cartHeaderFromDb = await _db.CartHeaders.FirstOrDefaultAsync(u=>u.UserId == cartDto.CartHeader.UserId);
+                // Retrieve the cart header from the database based on the user ID.
+                var cartHeaderFromDb = await _db.CartHeaders.FirstOrDefaultAsync(u => u.UserId == cartDto.CartHeader.UserId);
+
                 if (cartHeaderFromDb == null)
                 {
-                    // create header and details
+                    // If the cart header doesn't exist, create a new one based on the DTO.
+                    CartHeader cartHeader = _mapper.Map<CartHeader>(cartDto.CartHeader);
+                    _db.CartHeaders.Add(cartHeader);
+                    await _db.SaveChangesAsync();
+
+                    // Set the CartHeaderId for the first CartDetails item and add it to the database.
+                    cartDto.CartDetails.First().CartHeaderId = cartHeader.CartHeaderId;
+                    _db.CartDetails.Add(_mapper.Map<CartDetails>(cartDto.CartDetails.First()));
+                    await _db.SaveChangesAsync();
                 }
                 else
                 {
-                    // check for same products
+                    // Check if the product already exists in the cart details for the given cart header.
                     var cartDetailsFromDb = await _db.CartDetails.FirstOrDefaultAsync(
                         u => u.ProductId == cartDto.CartDetails.First().ProductId &&
-                        u.CartHeaderId == cartHeaderFromDb.CartHeaderId);
+                             u.CartHeaderId == cartHeaderFromDb.CartHeaderId);
+
                     if (cartDetailsFromDb == null)
                     {
-                        // create cartdetails
+                        // If the product doesn't exist in the cart details, create a new cart details entry.
+                        // Additional logic for creating new cart details goes here.
                     }
                     else
                     {
-                        // update count in cart details
+                        // If the product already exists, update its count in the cart details.
+                        // Additional logic for updating cart details count goes here.
                     }
                 }
             }
             catch (Exception ex)
             {
+                // Handle any exceptions that occur during the cart upsert operation.
                 _response.Message = ex.Message.ToString();
                 _response.IsSuccess = false;
             }
+
+            return _response; // Return the response object after processing the cart upsert operation.
         }
+
     }
 }
