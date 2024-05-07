@@ -1,19 +1,23 @@
+using IdentityModel;
 using Mango.Web.Models;
 using Mango.Web.Service.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Mango.Web.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IProductService _productService;
+        private readonly ICartService _cartService;
 
-        public HomeController(IProductService productService)
+        public HomeController(IProductService productService, ICartService cartService)
         {
             _productService = productService;
+            _cartService = cartService;
         }
 
         public async Task<IActionResult> Index()
@@ -59,6 +63,57 @@ namespace Mango.Web.Controllers
 
             return View(model); // Return the view with the product details model
         }
+
+        [Authorize]
+        [HttpPost]
+        [ActionName("ProductDetails")]
+        public async Task<IActionResult> ProductDetails(ProductDto productDto)
+        {
+            // Retrieve the user ID from the JWT claims
+            string userId = User.Claims.FirstOrDefault(u => u.Type == JwtClaimTypes.Subject)?.Value;
+
+            // Create a new CartDto object representing the user's cart
+            CartDto cartDto = new CartDto()
+            {
+                CartHeader = new CartHeaderDto
+                {
+                    UserId = userId
+                }
+            };
+
+            // Create a CartDetailsDto object representing the product to be added to the cart
+            CartDetailsDto cartDetails = new CartDetailsDto()
+            {
+                Count = productDto.Count,
+                ProductId = productDto.ProductId,
+            };
+
+            // Add the CartDetailsDto object to a list of cart details
+            List<CartDetailsDto> cartDetailsDtos = new() { cartDetails };
+
+            // Assign the list of cart details to the CartDto
+            cartDto.CartDetails = cartDetailsDtos;
+
+            // Call the CartService to upsert (create/update) the cart asynchronously
+            ResponseDto? response = await _cartService.UpsertCartAsync(cartDto);
+
+            // Check if the cart upsert operation was successful
+            if (response != null && response.IsSuccess)
+            {
+                // Set a success message in TempData and redirect to the Index action
+                TempData["success"] = "Item has been added to the Shopping Cart";
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                // Set an error message in TempData if cart upsert fails
+                TempData["error"] = response?.Message;
+            }
+
+            // Return the ProductDto to the view (typically used for error handling)
+            return View(productDto);
+        }
+
 
 
         public IActionResult Privacy()
