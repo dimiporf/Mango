@@ -7,8 +7,9 @@
         public static string CouponAPIBase { get; set; }
         public static string ProductAPIBase { get; set; }
 
-        // Base URL for the Auth API.
+        // Base URL for the Auth and Cart API.
         public static string AuthAPIBase { get; set; }
+        public static string ShoppingCartAPIBase { get; set; }
 
         // Constants for role configuration
         public const string RoleAdmin = "ADMIN";
