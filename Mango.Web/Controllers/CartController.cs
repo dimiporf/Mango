@@ -26,6 +26,27 @@ namespace Mango.Web.Controllers
             return View(await LoadCartDtoBasedOnLoggedUser());
         }
 
+        public async Task<IActionResult> Remove(int cartDetailsId)
+        {
+            // Retrieve the user ID from the JWT claims
+            var userId = User.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Sub)?.Value;
+
+            // Call the CartService to remove the item from the cart asynchronously
+            ResponseDto? response = await _cartService.RemoveFromCartAsync(cartDetailsId);
+
+            // Check if the item removal was successful
+            if (response != null && response.IsSuccess)
+            {
+                // Set a success message in TempData and redirect to the CartIndex action
+                TempData["success"] = "Cart updated successfully!";
+                return RedirectToAction(nameof(CartIndex));
+            }
+
+            // If the removal operation fails or encounters an error, return an empty view
+            return View();
+        }
+
+
         // Helper method to load the cart details based on the logged-in user
         private async Task<CartDto> LoadCartDtoBasedOnLoggedUser()
         {
