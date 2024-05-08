@@ -57,7 +57,9 @@ namespace Mango.Web.Service
                 if (requestDto.Data != null)
                 {
                     message.Content = new StringContent(JsonConvert.SerializeObject(requestDto.Data), Encoding.UTF8, "application/json");
-                }                
+                }
+
+                HttpResponseMessage? apiResponse = null;
 
                 // Set the HTTP method based on the ApiType specified in the RequestDto.
                 switch (requestDto.ApiType)
@@ -77,7 +79,7 @@ namespace Mango.Web.Service
                 }
 
                 // Send the HTTP request asynchronously and await the response.
-                HttpResponseMessage? apiResponse = await client.SendAsync(message);
+                apiResponse = await client.SendAsync(message);
 
                 // Handle different HTTP status codes in the response.
                 switch (apiResponse.StatusCode)
