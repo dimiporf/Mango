@@ -46,19 +46,47 @@ namespace Mango.Web.Controllers
             return View();
         }
 
+        // Handles the HTTP POST request to apply a coupon to the shopping cart.
         [HttpPost]
         public async Task<IActionResult> ApplyCoupon(CartDto cartDto)
-        {            
+        {
+            // Call the CartService to apply the coupon asynchronously.
             ResponseDto? response = await _cartService.ApplyCouponAsync(cartDto);
-                        
-            if (response != null & response.IsSuccess)
-            {               
+
+            // Check if the coupon application was successful.
+            if (response != null && response.IsSuccess)
+            {
+                // Set success message in TempData and redirect to CartIndex action.
                 TempData["success"] = "Cart updated successfully!";
                 return RedirectToAction(nameof(CartIndex));
             }
-            
+
+            // If applying the coupon failed or response is null, return to the view.
             return View();
         }
+
+        // Handles the HTTP POST request to remove a coupon from the shopping cart.
+        [HttpPost]
+        public async Task<IActionResult> RemoveCoupon(CartDto cartDto)
+        {
+            // Clear the coupon code in the CartDto to remove the coupon.
+            cartDto.CartHeader.CouponCode = "";
+
+            // Call the CartService to apply the updated CartDto (without coupon) asynchronously.
+            ResponseDto? response = await _cartService.ApplyCouponAsync(cartDto);
+
+            // Check if applying the updated CartDto was successful.
+            if (response != null && response.IsSuccess)
+            {
+                // Set success message in TempData and redirect to CartIndex action.
+                TempData["success"] = "Cart updated successfully!";
+                return RedirectToAction(nameof(CartIndex));
+            }
+
+            // If applying the updated CartDto failed or response is null, return to the view.
+            return View();
+        }
+
 
 
         // Helper method to load the cart details based on the logged-in user
