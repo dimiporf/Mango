@@ -10,7 +10,7 @@ namespace Mango.MessageBus
     public class MessageBus : IMessageBus
     {
         // The connection string used to connect to Azure Service Bus.
-        private string connectionString = "";
+        private string connectionString = "Endpoint=sb://dimweb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=+BrelkVwILrxNyaraaT3qgrCVAK8cPaC9+ASbAlvQ0k=";
 
         // Publishes a message to a specified topic or queue in Azure Service Bus.
         // The 'message' parameter is the object representing the message to be published.
