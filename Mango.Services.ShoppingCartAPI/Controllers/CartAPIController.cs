@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Mango.MessageBus;
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Models;
 using Mango.Services.ShoppingCartAPI.Models.Dto;
@@ -20,15 +21,19 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         private readonly AppDbContext _db; // Represents the application database context.
         private IProductService _productService;
         private ICouponService _couponService;
+        private IMessageBus _messageBus;
+        private IConfiguration _configuration;
 
         // Initializes a new instance of the CartAPIController class.
-        public CartAPIController(AppDbContext db, IMapper mapper, IProductService productService, ICouponService couponService)
+        public CartAPIController(AppDbContext db, IMapper mapper, IProductService productService, ICouponService couponService, IMessageBus messageBus, IConfiguration configuration)
         {
             _db = db;
             this._response = new ResponseDto(); // Initialize the response object.
             _mapper = mapper; // Assign the mapper for object mapping operations.
             _productService = productService;
-            _couponService = couponService; 
+            _couponService = couponService;
+            _messageBus = messageBus;
+            _configuration = configuration;
         }
 
         // Handles the HTTP GET request to retrieve a user's shopping cart details.
@@ -114,7 +119,28 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             return _response;
         }
 
-        
+        // Handles HTTP POST requests to the "EmailCartRequest" endpoint
+        [HttpPost("EmailCartRequest")]
+        public async Task<object> EmailCartRequest([FromBody] CartDto cartDto)
+        {
+            try
+            {
+                // Publish the cartDto object to a message bus using the configured topic or queue name
+                await _messageBus.PublishMessage(cartDto, _configuration.GetValue<string>("TopicAndQueueNames:EmailShoppingCart"));
+
+                // Set the result of the response to indicate success
+                _response.Result = true;
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that might occur during the process
+                _response.IsSuccess = false;
+                _response.Message = ex.ToString(); // Capture the exception details in the response message
+            }
+
+            // Return the response object, which might include success/failure status and message
+            return _response;
+        }
 
         // Handles the HTTP POST request to upsert a shopping cart.
         [HttpPost("CartUpsert")]
